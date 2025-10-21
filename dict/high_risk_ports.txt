@@ -1,0 +1,45 @@
+# 高危端口列表 - 优先扫描
+# 格式: http://IP:PORT
+# 扫描会自动跳过空格和注释
+
+# Redis - 未授权访问可执行任意命令
+http://127.0.0.1:6379
+http://localhost:6379
+http://192.168.1.1:6379
+
+# MySQL - 数据库未授权访问
+http://127.0.0.1:3306
+http://localhost:3306
+
+# MongoDB - NoSQL数据库未授权访问
+http://127.0.0.1:27017
+http://localhost:27017
+
+# Elasticsearch - 数据泄露风险
+http://127.0.0.1:9200
+http://localhost:9200
+
+# Memcached - 缓存数据泄露
+http://127.0.0.1:11211
+http://localhost:11211
+
+# Docker API - 容器逃逸风险
+http://127.0.0.1:2375
+http://localhost:2375
+
+# PostgreSQL - 数据库未授权访问
+http://127.0.0.1:5432
+http://localhost:5432
+
+# Docker Registry - 镜像仓库
+http://127.0.0.1:5000
+http://localhost:5000
+
+# CouchDB - 数据库未授权访问
+http://127.0.0.1:5984
+http://localhost:5984
+
+# InfluxDB - 时序数据库
+http://127.0.0.1:8086
+http://localhost:8086
+
