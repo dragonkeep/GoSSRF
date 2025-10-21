@@ -3,8 +3,6 @@
 <div align="center">
 
 
-![GoSSRF](images/0a87456e-f96b-42f1-9571-d51b123cd387.png)
-
 一款高效、灵活的 SSRF（Server-Side Request Forgery）漏洞检测工具
 
 [![Go Version](https://img.shields.io/badge/Go-1.20+-blue.svg)](https://golang.org)
