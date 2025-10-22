@@ -6,7 +6,7 @@
 一款高效、灵活的 SSRF（Server-Side Request Forgery）漏洞检测工具
 
 [![Go Version](https://img.shields.io/badge/Go-1.20+-blue.svg)](https://golang.org)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache-green.svg)](LICENSE)
 
 </div>
 
@@ -59,18 +59,21 @@ go build -o GoSSRFClient.exe
   -X string
         HTTP请求方法 (default "GET")
   -w string
-        自定义payload字典文件（指定后将跳过默认扫描）
+        自定义payload字典文件（指定后跳过默认扫描）
   -H string
         自定义HTTP Headers文件 (default "Header.txt")
   -i string
-        内网CIDR网段（例如：192.168.1.0/24）
+        内网扫描目标（支持: CIDR 192.168.1.0/24 | 单IP 192.168.1.1 | 范围 192.168.1.1-10）
+  -ports string
+        扫描端口范围（例如：1-1000 或 80,443,3306，不指定则扫描默认高危端口）
+  -oob string
+        OOB服务器地址（指定后自动启用OOB测试）
   -t int
         并发线程数 (default 10)
   -timeout int
         HTTP请求超时时间（秒） (default 10)
   -o string
         结果输出文件（内容与命令行输出一致）
-  -v    详细模式
 ```
 
 ## 📂 项目结构
@@ -102,7 +105,7 @@ GoSSRFClient/
 
 ## 🎯 检测范围
 
-### 默认扫描（不使用-w参数）
+### 默认扫描
 
 #### 1. 高危端口扫描
 

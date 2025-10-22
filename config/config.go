@@ -16,17 +16,16 @@ type Config struct {
 	PayloadFile   string // payload字典文件（-w参数）
 	ParamName     string // 要测试的参数名（-p参数）
 	Method        string // HTTP请求方式（-X参数）
-	OOBServer     string
+	OOBServer     string // OOB服务器地址，指定后自动启用OOB测试
 	InternalNet   string // 内网扫描CIDR，例如: 192.168.1.0/24
+	Ports         string // 端口范围，例如: 1-1000 或 80,443,3306,6379
+	ScanAll       bool   // 是否扫描所有默认payloads（-all参数）
 	Threads       int
 	Timeout       int
-	Verbose       bool
 	OutputFile    string
-	ScanPorts     bool
-	ScanFile      bool
-	ScanOOB       bool
-	CustomHeaders map[string]string // 从Header.yaml读取的自定义头
+	CustomHeaders map[string]string // 从Header.txt读取的自定义头
 	InternalIPs   []string          // 解析后的内网IP列表
+	PortList      []int             // 解析后的端口列表
 	HeaderFile    string            // Header配置文件路径
 }
 
@@ -39,17 +38,15 @@ func ParseFlags() *Config {
 	flag.StringVar(&cfg.TargetURL, "u", "", "目标URL (例如: http://example.com/api)")
 	flag.StringVar(&cfg.ParamName, "p", "", "要测试的参数名 (必须，例如: url)")
 	flag.StringVar(&cfg.Method, "X", "GET", "HTTP请求方式 (GET/POST/PUT等，默认: GET)")
-	flag.StringVar(&cfg.PayloadFile, "w", "", "自定义payload字典文件路径（可选）")
-	flag.StringVar(&cfg.OOBServer, "oob", "", "OOB服务器地址 (例如: http://your-server.com:8080)")
-	flag.StringVar(&cfg.InternalNet, "i", "", "内网扫描CIDR (例如: 192.168.1.0/24，不指定则只扫描127.0.0.1)")
-	flag.StringVar(&cfg.HeaderFile, "H", "Header.yaml", "自定义HTTP头文件路径 (默认: Header.yaml)")
+	flag.StringVar(&cfg.PayloadFile, "w", "", "自定义payload字典文件路径（指定后跳过默认扫描）")
+	flag.StringVar(&cfg.OOBServer, "oob", "", "OOB服务器地址 (例如: http://your-server.com:8080，指定后启用OOB测试)")
+	flag.StringVar(&cfg.InternalNet, "i", "", "内网扫描目标 (支持: CIDR 192.168.1.0/24 | 单IP 192.168.1.1 | 范围 192.168.1.1-10，指定后默认只扫描这些IP的端口)")
+	flag.StringVar(&cfg.Ports, "ports", "", "扫描端口范围 (例如: 1-1000 或 80,443,3306，不指定则扫描默认高危端口)")
+	flag.BoolVar(&cfg.ScanAll, "all", false, "扫描所有默认payloads (指定-i后，默认只扫描指定IP的端口，添加此参数可同时扫描文件读取、云元数据等)")
+	flag.StringVar(&cfg.HeaderFile, "H", "Header.txt", "自定义HTTP头文件路径 (默认: Header.txt)")
 	flag.IntVar(&cfg.Threads, "t", 10, "并发线程数")
 	flag.IntVar(&cfg.Timeout, "timeout", 10, "HTTP请求超时时间（秒）")
-	flag.BoolVar(&cfg.Verbose, "v", false, "详细输出模式")
 	flag.StringVar(&cfg.OutputFile, "o", "", "输出结果到文件")
-	flag.BoolVar(&cfg.ScanPorts, "scan-ports", true, "扫描内网端口（默认启用，默认只扫描127.0.0.1）")
-	flag.BoolVar(&cfg.ScanFile, "scan-file", true, "测试文件读取（file协议，默认启用）")
-	flag.BoolVar(&cfg.ScanOOB, "scan-oob", false, "测试OOB回连（需要-oob参数）")
 
 	return cfg
 }
@@ -81,31 +78,34 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("不支持的HTTP方法: %s", c.Method)
 	}
 
-	// 如果启用OOB扫描，必须指定OOB服务器
-	if c.ScanOOB && c.OOBServer == "" {
-		return errors.New("启用OOB扫描时必须指定OOB服务器地址 (-oob)")
-	}
-
-	// 验证OOB服务器地址格式
+	// 验证OOB服务器地址格式（如果指定了）
 	if c.OOBServer != "" {
 		if _, err := url.Parse(c.OOBServer); err != nil {
 			return fmt.Errorf("无效的OOB服务器地址: %v", err)
 		}
 	}
 
-	// 解析内网CIDR
+	// 解析内网IP（支持CIDR、单个IP、IP范围）
 	if c.InternalNet != "" {
-		ips, err := parseCIDR(c.InternalNet)
+		ips, err := parseInternalIPs(c.InternalNet)
 		if err != nil {
-			return fmt.Errorf("无效的CIDR格式: %v", err)
+			return fmt.Errorf("无效的IP格式: %v", err)
 		}
 		c.InternalIPs = ips
 	}
 
-	// 读取自定义Header文件
-	if err := c.loadHeaders(); err != nil {
-		// Header文件不存在不是致命错误，只是警告
-		if c.Verbose {
+	// 解析端口范围
+	if c.Ports != "" {
+		ports, err := parsePorts(c.Ports)
+		if err != nil {
+			return fmt.Errorf("无效的端口范围: %v", err)
+		}
+		c.PortList = ports
+	}
+
+	// 加载自定义Headers
+	if c.HeaderFile != "" {
+		if err := c.loadHeaders(); err != nil {
 			fmt.Printf("[*] Header文件读取失败，使用默认Header: %v\n", err)
 		}
 	}
@@ -169,6 +169,31 @@ func (c *Config) GetParams() map[string]string {
 	return params
 }
 
+// parseInternalIPs 解析内网IP（支持CIDR、单个IP、IP范围）
+func parseInternalIPs(ipStr string) ([]string, error) {
+	var ips []string
+
+	// 检查是否包含范围符号 "-"
+	if strings.Contains(ipStr, "-") && !strings.Contains(ipStr, "/") {
+		// IP范围格式: 192.168.1.1-10
+		return parseIPRange(ipStr)
+	}
+
+	// 检查是否是CIDR格式
+	if strings.Contains(ipStr, "/") {
+		// CIDR格式: 192.168.1.0/24
+		return parseCIDR(ipStr)
+	}
+
+	// 单个IP格式: 192.168.1.1
+	ip := net.ParseIP(ipStr)
+	if ip == nil {
+		return nil, fmt.Errorf("无效的IP地址: %s", ipStr)
+	}
+	ips = append(ips, ipStr)
+	return ips, nil
+}
+
 // parseCIDR 解析CIDR并返回IP列表
 func parseCIDR(cidr string) ([]string, error) {
 	var ips []string
@@ -189,15 +214,91 @@ func parseCIDR(cidr string) ([]string, error) {
 		ips = ips[1 : len(ips)-1]
 	}
 
-	// 限制最大IP数量，避免扫描过大网段导致性能问题（已注释，用户要求移除限制）
-	// maxIPs := 254
-	// if len(ips) > maxIPs {
-	// 	red := Colors(ColorRed)
-	// 	red.Printf("[!] 警告: CIDR包含%d个IP，为避免扫描时间过长，仅扫描前%d个\n", len(ips), maxIPs)
-	// 	ips = ips[:maxIPs]
-	// }
+	return ips, nil
+}
+
+// parseIPRange 解析IP范围（格式: 192.168.1.1-10 或 192.168.1.1-192.168.1.10）
+func parseIPRange(rangeStr string) ([]string, error) {
+	var ips []string
+
+	parts := strings.Split(rangeStr, "-")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("无效的IP范围格式: %s", rangeStr)
+	}
+
+	startIPStr := strings.TrimSpace(parts[0])
+	endIPStr := strings.TrimSpace(parts[1])
+
+	// 解析起始IP
+	startIP := net.ParseIP(startIPStr)
+	if startIP == nil {
+		return nil, fmt.Errorf("无效的起始IP: %s", startIPStr)
+	}
+	startIP = startIP.To4()
+	if startIP == nil {
+		return nil, fmt.Errorf("仅支持IPv4地址: %s", startIPStr)
+	}
+
+	// 处理结束IP
+	var endIP net.IP
+	if strings.Contains(endIPStr, ".") {
+		// 完整IP格式: 192.168.1.1-192.168.1.10
+		endIP = net.ParseIP(endIPStr)
+		if endIP == nil {
+			return nil, fmt.Errorf("无效的结束IP: %s", endIPStr)
+		}
+		endIP = endIP.To4()
+		if endIP == nil {
+			return nil, fmt.Errorf("仅支持IPv4地址: %s", endIPStr)
+		}
+	} else {
+		// 简写格式: 192.168.1.1-10（表示192.168.1.1到192.168.1.10）
+		var lastOctet int
+		if _, err := fmt.Sscanf(endIPStr, "%d", &lastOctet); err != nil {
+			return nil, fmt.Errorf("无效的结束IP格式: %s", endIPStr)
+		}
+		if lastOctet < 0 || lastOctet > 255 {
+			return nil, fmt.Errorf("IP最后一位必须在0-255之间: %d", lastOctet)
+		}
+
+		// 构造完整的结束IP
+		endIP = make(net.IP, 4)
+		copy(endIP, startIP)
+		endIP[3] = byte(lastOctet)
+	}
+
+	// 验证起始IP不大于结束IP
+	if compareIP(startIP, endIP) > 0 {
+		return nil, fmt.Errorf("起始IP不能大于结束IP: %s-%s", startIPStr, endIP.String())
+	}
+
+	// 生成IP范围
+	currentIP := make(net.IP, len(startIP))
+	copy(currentIP, startIP)
+
+	for {
+		ips = append(ips, currentIP.String())
+		if compareIP(currentIP, endIP) >= 0 {
+			break
+		}
+		inc(currentIP)
+	}
 
 	return ips, nil
+}
+
+// compareIP 比较两个IP地址
+// 返回: -1 (ip1 < ip2), 0 (ip1 == ip2), 1 (ip1 > ip2)
+func compareIP(ip1, ip2 net.IP) int {
+	for i := 0; i < len(ip1); i++ {
+		if ip1[i] < ip2[i] {
+			return -1
+		}
+		if ip1[i] > ip2[i] {
+			return 1
+		}
+	}
+	return 0
 }
 
 // inc IP地址递增
@@ -208,4 +309,81 @@ func inc(ip net.IP) {
 			break
 		}
 	}
+}
+
+// parsePorts 解析端口范围
+// 支持格式: "80,443,3306" 或 "1-1000" 或混合 "80,443,1000-2000"
+func parsePorts(portStr string) ([]int, error) {
+	var ports []int
+	seen := make(map[int]bool)
+
+	parts := strings.Split(portStr, ",")
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+
+		// 检查是否是范围 (例如: 1-1000)
+		if strings.Contains(part, "-") {
+			rangeParts := strings.Split(part, "-")
+			if len(rangeParts) != 2 {
+				return nil, fmt.Errorf("无效的端口范围格式: %s", part)
+			}
+
+			var start, end int
+			if _, err := fmt.Sscanf(rangeParts[0], "%d", &start); err != nil {
+				return nil, fmt.Errorf("无效的起始端口: %s", rangeParts[0])
+			}
+			if _, err := fmt.Sscanf(rangeParts[1], "%d", &end); err != nil {
+				return nil, fmt.Errorf("无效的结束端口: %s", rangeParts[1])
+			}
+
+			if start < 1 || start > 65535 || end < 1 || end > 65535 {
+				return nil, fmt.Errorf("端口号必须在1-65535之间: %s", part)
+			}
+			if start > end {
+				return nil, fmt.Errorf("起始端口不能大于结束端口: %s", part)
+			}
+
+			for port := start; port <= end; port++ {
+				if !seen[port] {
+					ports = append(ports, port)
+					seen[port] = true
+				}
+			}
+		} else {
+			// 单个端口
+			var port int
+			if _, err := fmt.Sscanf(part, "%d", &port); err != nil {
+				return nil, fmt.Errorf("无效的端口号: %s", part)
+			}
+
+			if port < 1 || port > 65535 {
+				return nil, fmt.Errorf("端口号必须在1-65535之间: %d", port)
+			}
+
+			if !seen[port] {
+				ports = append(ports, port)
+				seen[port] = true
+			}
+		}
+	}
+
+	return ports, nil
+}
+
+// ShouldScanOOB 判断是否应该进行OOB扫描
+func (c *Config) ShouldScanOOB() bool {
+	return c.OOBServer != ""
+}
+
+// ShouldScanDefaultPayloads 判断是否应该扫描默认payloads（文件读取、云元数据等）
+// 返回true的情况：
+// 1. 没有指定-i参数（默认扫描全部）
+// 2. 指定了-i参数，但同时指定了-all参数
+func (c *Config) ShouldScanDefaultPayloads() bool {
+	// 如果没有指定内网IP，默认扫描所有
+	if c.InternalNet == "" {
+		return true
+	}
+	// 如果指定了-i，只有添加了-all参数才扫描默认payloads
+	return c.ScanAll
 }

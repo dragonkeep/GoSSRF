@@ -60,7 +60,7 @@ func main() {
 	vulnerableCount := scanManager.RunScan()
 
 	// 打印摘要
-	summaryMsg := fmt.Sprintf("\n扫描完成，发现 %d 个漏洞\n", vulnerableCount)
+	summaryMsg := fmt.Sprintf("\n扫描完成，存在 %d 个SSRF测试点\n", vulnerableCount)
 	fmt.Print(summaryMsg)
 
 	if outputFile != nil {

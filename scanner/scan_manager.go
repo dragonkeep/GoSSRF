@@ -57,18 +57,16 @@ func (sm *ScanManager) RunScan() int {
 	}
 
 	// 否则使用默认扫描
-	// 1. 端口扫描
-	if sm.config.ScanPorts {
-		sm.scanPorts(params)
-	}
+	// 1. 端口扫描（总是启用）
+	sm.scanPorts(params)
 
-	// 2. 文件读取测试
-	if sm.config.ScanFile {
+	// 2. 文件读取测试（根据配置决定是否启用）
+	if sm.config.ShouldScanDefaultPayloads() {
 		sm.scanFileRead(params)
 	}
 
-	// 3. OOB测试
-	if sm.config.ScanOOB {
+	// 3. OOB测试（指定-oob参数后启用，且满足ShouldScanDefaultPayloads条件）
+	if sm.config.ShouldScanOOB() && sm.config.ShouldScanDefaultPayloads() {
 		sm.scanOOB(params)
 	}
 
@@ -84,8 +82,8 @@ func (sm *ScanManager) scanPorts(params map[string]string) {
 		return
 	}
 
-	// 获取端口扫描payload（传入内网IP列表）
-	portPayloads := payloads.GetPortScanPayloads(sm.config.InternalIPs)
+	// 获取端口扫描payload（传入内网IP列表、自定义端口列表、是否包含云元数据）
+	portPayloads := payloads.GetPortScanPayloads(sm.config.InternalIPs, sm.config.PortList, sm.config.ShouldScanDefaultPayloads())
 	semaphore := make(chan struct{}, sm.config.Threads)
 
 	for paramName := range params {
