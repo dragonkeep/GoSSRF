@@ -36,17 +36,35 @@ func ParseFlags() *Config {
 	}
 
 	flag.StringVar(&cfg.TargetURL, "u", "", "目标URL (例如: http://example.com/api)")
-	flag.StringVar(&cfg.ParamName, "p", "", "要测试的参数名 (必须，例如: url)")
 	flag.StringVar(&cfg.Method, "X", "GET", "HTTP请求方式 (GET/POST/PUT等，默认: GET)")
+	flag.StringVar(&cfg.ParamName, "p", "", "要测试的参数名 (必须，例如: url)")
+	flag.StringVar(&cfg.HeaderFile, "H", "Header.txt", "自定义HTTP头文件路径 (默认: Header.txt)")
+	flag.StringVar(&cfg.OutputFile, "o", "", "输出结果到文件")
 	flag.StringVar(&cfg.PayloadFile, "w", "", "自定义payload字典文件路径（指定后跳过默认扫描）")
 	flag.StringVar(&cfg.OOBServer, "oob", "", "OOB服务器地址 (例如: http://your-server.com:8080，指定后启用OOB测试)")
 	flag.StringVar(&cfg.InternalNet, "i", "", "内网扫描目标 (支持: CIDR 192.168.1.0/24 | 单IP 192.168.1.1 | 范围 192.168.1.1-10，指定后默认只扫描这些IP的端口)")
 	flag.StringVar(&cfg.Ports, "ports", "", "扫描端口范围 (例如: 1-1000 或 80,443,3306，不指定则扫描默认高危端口)")
-	flag.BoolVar(&cfg.ScanAll, "all", false, "扫描所有默认payloads (指定-i后，默认只扫描指定IP的端口，添加此参数可同时扫描文件读取、云元数据等)")
-	flag.StringVar(&cfg.HeaderFile, "H", "Header.txt", "自定义HTTP头文件路径 (默认: Header.txt)")
-	flag.IntVar(&cfg.Threads, "t", 10, "并发线程数")
 	flag.IntVar(&cfg.Timeout, "timeout", 10, "HTTP请求超时时间（秒）")
-	flag.StringVar(&cfg.OutputFile, "o", "", "输出结果到文件")
+	flag.IntVar(&cfg.Threads, "t", 10, "并发线程数")
+	flag.BoolVar(&cfg.ScanAll, "all", false, "扫描所有默认payloads (指定-i后，默认只扫描指定IP的端口，添加此参数可同时扫描文件读取、云元数据等)")
+
+	// 自定义帮助信息输出顺序
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
+
+		// 按自定义顺序输出参数
+		order := []string{"u", "X", "p", "H", "o", "w", "oob", "i", "ports", "timeout", "t", "all"}
+		for _, name := range order {
+			f := flag.Lookup(name)
+			if f != nil {
+				fmt.Fprintf(flag.CommandLine.Output(), "  -%s", f.Name)
+				if f.DefValue != "" && f.DefValue != "false" {
+					fmt.Fprintf(flag.CommandLine.Output(), " %s", f.DefValue)
+				}
+				fmt.Fprintf(flag.CommandLine.Output(), "\n    \t%s\n", f.Usage)
+			}
+		}
+	}
 
 	return cfg
 }
