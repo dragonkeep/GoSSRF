@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 // ScanResult 扫描结果
@@ -60,13 +61,19 @@ func (sm *ScanManager) RunScan() int {
 	// 1. 端口扫描（总是启用）
 	sm.scanPorts(params)
 
-	// 2. 文件读取测试（根据配置决定是否启用）
-	if sm.config.ShouldScanDefaultPayloads() {
-		sm.scanFileRead(params)
+	// 2. 高危协议和文件读取测试（默认启用）
+	sm.scanHighRisk(params)
+
+	// 3. 云元数据测试（默认启用）
+	sm.scanCloudMetadata(params)
+
+	// 4. 如果指定了-all参数，扫描所有内置字典文件（绕过技术等）
+	if sm.config.ScanAll {
+		sm.scanAllDictPayloads(params)
 	}
 
-	// 3. OOB测试（指定-oob参数后启用，且满足ShouldScanDefaultPayloads条件）
-	if sm.config.ShouldScanOOB() && sm.config.ShouldScanDefaultPayloads() {
+	// 5. OOB测试（指定-oob参数后启用）
+	if sm.config.ShouldScanOOB() {
 		sm.scanOOB(params)
 	}
 
@@ -82,8 +89,8 @@ func (sm *ScanManager) scanPorts(params map[string]string) {
 		return
 	}
 
-	// 获取端口扫描payload（传入内网IP列表、自定义端口列表、是否包含云元数据）
-	portPayloads := payloads.GetPortScanPayloads(sm.config.InternalIPs, sm.config.PortList, sm.config.ShouldScanDefaultPayloads())
+	// 获取端口扫描payload（传入内网IP列表、自定义端口列表）
+	portPayloads := payloads.GetPortScanPayloads(sm.config.InternalIPs, sm.config.PortList)
 	semaphore := make(chan struct{}, sm.config.Threads)
 
 	for paramName := range params {
@@ -105,21 +112,43 @@ func (sm *ScanManager) scanPorts(params map[string]string) {
 	wg.Wait()
 }
 
-// scanFileRead 文件读取测试
-func (sm *ScanManager) scanFileRead(params map[string]string) {
+// scanHighRisk 高危协议和文件读取测试
+func (sm *ScanManager) scanHighRisk(params map[string]string) {
 	var wg sync.WaitGroup
 
-	// 如果指定了字典文件，则不使用默认payload
-	if sm.config.PayloadFile != "" {
-		return
-	}
-
-	// 获取文件读取payload
-	filePayloads := payloads.GetFileReadPayloads()
+	// 获取高危payload
+	highRiskPayloads := payloads.GetHighRiskPayloads()
 	semaphore := make(chan struct{}, sm.config.Threads)
 
 	for paramName := range params {
-		for _, payload := range filePayloads {
+		for _, payload := range highRiskPayloads {
+			wg.Add(1)
+			semaphore <- struct{}{}
+
+			go func(param string, pl payloads.Payload) {
+				defer func() {
+					<-semaphore
+					wg.Done()
+				}()
+
+				sm.testPayload(param, pl)
+			}(paramName, payload)
+		}
+	}
+
+	wg.Wait()
+}
+
+// scanCloudMetadata 云服务元数据测试
+func (sm *ScanManager) scanCloudMetadata(params map[string]string) {
+	var wg sync.WaitGroup
+
+	// 获取云元数据payload
+	cloudPayloads := payloads.GetCloudMetadataPayloads()
+	semaphore := make(chan struct{}, sm.config.Threads)
+
+	for paramName := range params {
+		for _, payload := range cloudPayloads {
 			wg.Add(1)
 			semaphore <- struct{}{}
 
@@ -166,6 +195,11 @@ func (sm *ScanManager) scanOOB(params map[string]string) {
 
 // testPayload 测试单个payload
 func (sm *ScanManager) testPayload(param string, payload payloads.Payload) {
+	// 如果设置了延迟时间，则延迟发包
+	if sm.config.DelayTime > 0 {
+		time.Sleep(time.Duration(sm.config.DelayTime) * time.Second)
+	}
+
 	// 构造测试请求
 	testURL, body, err := buildTestRequest(sm.config.Method, sm.config.TargetURL, param, payload.Value)
 	if err != nil {
@@ -212,6 +246,43 @@ func (sm *ScanManager) testPayload(param string, payload payloads.Payload) {
 		sm.vulnCountMux.Unlock()
 	}
 	sm.outputMux.Unlock()
+}
+
+// scanAllDictPayloads 扫描所有内置字典文件（绕过技术、编码变种等）
+func (sm *ScanManager) scanAllDictPayloads(params map[string]string) {
+	var wg sync.WaitGroup
+
+	// 加载所有内置字典文件
+	dictPayloads := payloads.GetAllDictPayloads()
+
+	if len(dictPayloads) == 0 {
+		red := config.Colors(config.ColorRed)
+		red.Printf("[!] 未能加载任何内置字典文件\n")
+		return
+	}
+
+	green := config.Colors(config.ColorGreen)
+	green.Printf("[+] 已加载 %d 个内置字典 payload（绕过技术、编码变种等）\n", len(dictPayloads))
+
+	semaphore := make(chan struct{}, sm.config.Threads)
+
+	for paramName := range params {
+		for _, payload := range dictPayloads {
+			wg.Add(1)
+			semaphore <- struct{}{}
+
+			go func(param string, pl payloads.Payload) {
+				defer func() {
+					<-semaphore
+					wg.Done()
+				}()
+
+				sm.testPayload(param, pl)
+			}(paramName, payload)
+		}
+	}
+
+	wg.Wait()
 }
 
 // scanWithCustomDict 使用自定义字典扫描
@@ -269,14 +340,11 @@ func (sm *ScanManager) loadCustomPayloads() ([]payloads.Payload, error) {
 		}
 
 		// 创建payload
-		payload := payloads.Payload{
-			Value:       line,
-			Type:        "自定义字典",
-			Description: fmt.Sprintf("字典行 %d: %s", lineNum, line),
-			Severity:    "medium",
-			Keywords:    []string{},
-		}
-		result = append(result, payload)
+		result = append(result, payloads.Payload{
+			Value:    line,
+			Type:     "自定义字典",
+			Keywords: []string{},
+		})
 	}
 
 	if err := scanner.Err(); err != nil {

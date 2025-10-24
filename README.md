@@ -45,7 +45,7 @@
 ```bash
 git clone https://github.com/yourusername/GoSSRF.git
 cd GoSSRF/GoSSRFClient
-go build -o GoSSRFClient.exe
+go build -o GoSSRF.exe
 ```
 
 ## 📋 命令行参数
@@ -63,7 +63,7 @@ go build -o GoSSRFClient.exe
   -H string
         自定义HTTP Headers文件 (default "Header.txt")
   -i string
-        内网扫描目标（支持: CIDR 192.168.1.0/24 | 单IP 192.168.1.1 | 范围 192.168.1.1-10）
+        内网扫描目标（支持: CIDR 192.168.1.0/24 | 单IP 192.168.1.1 | 范围 192.168.1.1-10|域名 localhost）
   -ports string
         扫描端口范围（例如：1-1000 或 80,443,3306，不指定则扫描默认高危端口）
   -oob string
@@ -72,6 +72,10 @@ go build -o GoSSRFClient.exe
         并发线程数 (default 10)
   -timeout int
         HTTP请求超时时间（秒） (default 10)
+  -delaytime int 
+        延迟请求时间（秒）（default 0）
+  -all 
+        指定后扫描所有内置的字典
   -o string
         结果输出文件（内容与命令行输出一致）
 ```
@@ -79,7 +83,7 @@ go build -o GoSSRFClient.exe
 ## 📂 项目结构
 
 ```
-GoSSRFClient/
+GoSSRF/
 ├── main.go              # 程序入口
 ├── config/              # 配置模块
 │   ├── config.go        # 配置解析和管理
@@ -145,13 +149,13 @@ GoSSRFClient/
 
 ```bash
 # GET请求测试
-GoSSRFClient.exe -u "http://example.com/api" -p url -X GET
+GoSSRF.exe -u "http://example.com/api" -p url -X GET
 
 # POST请求测试
-GoSSRFClient.exe -u "http://example.com/api" -p data -X POST
+GoSSRF.exe -u "http://example.com/api" -p data -X POST
 
 # 指定输出文件
-GoSSRFClient.exe -u "http://example.com/api" -p url -o result.txt
+GoSSRF.exe -u "http://example.com/api" -p url -o result.txt
 ```
 
 ### 高级用法
@@ -160,7 +164,7 @@ GoSSRFClient.exe -u "http://example.com/api" -p url -o result.txt
 
 ```bash
 # 使用自定义payload字典（会跳过默认扫描）
-GoSSRFClient.exe -u "http://example.com/api" -p url -w custom_payloads.txt
+GoSSRF.exe -u "http://example.com/api" -p url -w custom_payloads.txt
 ```
 
 字典文件格式：
@@ -177,7 +181,7 @@ http://169.254.169.254/latest/meta-data/
 
 ```bash
 # 使用自定义Headers
-GoSSRFClient.exe -u "http://example.com/api" -p url -H Header.txt
+GoSSRF.exe -u "http://example.com/api" -p url -H Header.txt
 ```
 
 Header.txt文件格式（Burp兼容）：
@@ -194,20 +198,20 @@ Accept: application/json
 
 ```bash
 # 默认只扫描127.0.0.1
-GoSSRFClient.exe -u "http://example.com/api" -p url
+GoSSRF.exe -u "http://example.com/api" -p url
 
 # 扫描指定内网网段
-GoSSRFClient.exe -u "http://example.com/api" -p url -i 192.168.1.0/24
+GoSSRF.exe -u "http://example.com/api" -p url -i 192.168.1.0/24
 
 # 扫描多个C段
-GoSSRFClient.exe -u "http://example.com/api" -p url -i 10.0.0.0/16
+GoSSRF.exe -u "http://example.com/api" -p url -i 10.0.0.0/16
 ```
 
 #### 4. 调整并发和超时
 
 ```bash
 # 使用20个并发线程，超时30秒
-GoSSRFClient.exe -u "http://example.com/api" -p url -t 20 -timeout 30
+GoSSRF.exe -u "http://example.com/api" -p url -t 20 -timeout 30
 ```
 
 

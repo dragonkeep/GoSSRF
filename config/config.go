@@ -13,16 +13,17 @@ import (
 // Config 配置结构
 type Config struct {
 	TargetURL     string
-	PayloadFile   string // payload字典文件（-w参数）
-	ParamName     string // 要测试的参数名（-p参数）
-	Method        string // HTTP请求方式（-X参数）
-	OOBServer     string // OOB服务器地址，指定后自动启用OOB测试
-	InternalNet   string // 内网扫描CIDR，例如: 192.168.1.0/24
-	Ports         string // 端口范围，例如: 1-1000 或 80,443,3306,6379
-	ScanAll       bool   // 是否扫描所有默认payloads（-all参数）
-	Threads       int
-	Timeout       int
-	OutputFile    string
+	PayloadFile   string            // payload字典文件（-w参数）
+	ParamName     string            // 要测试的参数名（-p参数）
+	Method        string            // HTTP请求方式（-X参数）
+	OOBServer     string            // OOB服务器地址，指定后自动启用OOB测试
+	InternalNet   string            // 内网扫描CIDR，例如: 192.168.1.0/24
+	Ports         string            // 端口范围，例如: 1-1000 或 80,443,3306,6379
+	ScanAll       bool              // 是否扫描所有默认payloads（-all参数）
+	Threads       int               // 并发线程数（-t参数）
+	Timeout       int               // HTTP请求超时时间（-timeout参数）
+	DelayTime     int               // 每次发包间隔时间（毫秒）
+	OutputFile    string            // 输出结果到文件（-o参数）
 	CustomHeaders map[string]string // 从Header.txt读取的自定义头
 	InternalIPs   []string          // 解析后的内网IP列表
 	PortList      []int             // 解析后的端口列表
@@ -42,18 +43,19 @@ func ParseFlags() *Config {
 	flag.StringVar(&cfg.OutputFile, "o", "", "输出结果到文件")
 	flag.StringVar(&cfg.PayloadFile, "w", "", "自定义payload字典文件路径（指定后跳过默认扫描）")
 	flag.StringVar(&cfg.OOBServer, "oob", "", "OOB服务器地址 (例如: http://your-server.com:8080，指定后启用OOB测试)")
-	flag.StringVar(&cfg.InternalNet, "i", "", "内网扫描目标 (支持: CIDR 192.168.1.0/24 | 单IP 192.168.1.1 | 范围 192.168.1.1-10，指定后默认只扫描这些IP的端口)")
+	flag.StringVar(&cfg.InternalNet, "i", "", "内网扫描目标 (支持: CIDR 192.168.1.0/24 | 单IP 192.168.1.1 | 范围 192.168.1.1-10 | 域名 localhost，指定后默认只扫描这些IP的端口)")
 	flag.StringVar(&cfg.Ports, "ports", "", "扫描端口范围 (例如: 1-1000 或 80,443,3306，不指定则扫描默认高危端口)")
 	flag.IntVar(&cfg.Timeout, "timeout", 10, "HTTP请求超时时间（秒）")
 	flag.IntVar(&cfg.Threads, "t", 10, "并发线程数")
-	flag.BoolVar(&cfg.ScanAll, "all", false, "扫描所有默认payloads (指定-i后，默认只扫描指定IP的端口，添加此参数可同时扫描文件读取、云元数据等)")
+	flag.IntVar(&cfg.DelayTime, "delaytime", 0, "每次发包间隔时间（秒，默认无延迟）")
+	flag.BoolVar(&cfg.ScanAll, "all", false, "扫描所有内置字典")
 
 	// 自定义帮助信息输出顺序
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
 
 		// 按自定义顺序输出参数
-		order := []string{"u", "X", "p", "H", "o", "w", "oob", "i", "ports", "timeout", "t", "all"}
+		order := []string{"u", "X", "p", "H", "o", "w", "oob", "i", "ports", "timeout", "t", "delaytime", "all"}
 		for _, name := range order {
 			f := flag.Lookup(name)
 			if f != nil {
@@ -187,11 +189,17 @@ func (c *Config) GetParams() map[string]string {
 	return params
 }
 
-// parseInternalIPs 解析内网IP（支持CIDR、单个IP、IP范围）
+// parseInternalIPs 解析内网IP（支持CIDR、单个IP、IP范围、主机名/域名）
 func parseInternalIPs(ipStr string) ([]string, error) {
 	var ips []string
 
-	// 检查是否包含范围符号 "-"
+	// 去除首尾空白
+	ipStr = strings.TrimSpace(ipStr)
+	if ipStr == "" {
+		return nil, fmt.Errorf("目标地址不能为空")
+	}
+
+	// 检查是否包含范围符号 "-"（但不是IPv6地址）
 	if strings.Contains(ipStr, "-") && !strings.Contains(ipStr, "/") {
 		// IP范围格式: 192.168.1.1-10
 		return parseIPRange(ipStr)
@@ -203,11 +211,26 @@ func parseInternalIPs(ipStr string) ([]string, error) {
 		return parseCIDR(ipStr)
 	}
 
-	// 单个IP格式: 192.168.1.1
 	ip := net.ParseIP(ipStr)
-	if ip == nil {
-		return nil, fmt.Errorf("无效的IP地址: %s", ipStr)
+	if ip != nil {
+		// 是有效的IP地址格式
+		ips = append(ips, ipStr)
+		return ips, nil
 	}
+	validHostname := true
+	for _, ch := range ipStr {
+		if !((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
+			(ch >= '0' && ch <= '9') || ch == '.' || ch == '-' || ch == '_') {
+			validHostname = false
+			break
+		}
+	}
+
+	if !validHostname {
+		return nil, fmt.Errorf("无效的目标地址格式: %s (仅支持字母、数字、点、中划线、下划线)", ipStr)
+	}
+
+	// 直接返回主机名，不解析（由目标服务器内网DNS解析）
 	ips = append(ips, ipStr)
 	return ips, nil
 }
@@ -391,17 +414,4 @@ func parsePorts(portStr string) ([]int, error) {
 // ShouldScanOOB 判断是否应该进行OOB扫描
 func (c *Config) ShouldScanOOB() bool {
 	return c.OOBServer != ""
-}
-
-// ShouldScanDefaultPayloads 判断是否应该扫描默认payloads（文件读取、云元数据等）
-// 返回true的情况：
-// 1. 没有指定-i参数（默认扫描全部）
-// 2. 指定了-i参数，但同时指定了-all参数
-func (c *Config) ShouldScanDefaultPayloads() bool {
-	// 如果没有指定内网IP，默认扫描所有
-	if c.InternalNet == "" {
-		return true
-	}
-	// 如果指定了-i，只有添加了-all参数才扫描默认payloads
-	return c.ScanAll
 }

